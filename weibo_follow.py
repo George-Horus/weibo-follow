@@ -46,16 +46,24 @@ class Follow(object):
         try:
             user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36'
             headers = {
-                'User_Agent': user_agent,
+                'User-Agent': user_agent,
                 'Cookie': self.cookie,
-                'Connection': 'close'
+                'Connection': 'close',
             }
-            html = requests.get(url, headers=headers).content
-            selector = etree.HTML(html)
+            # 发起请求并获取响应
+            response = requests.get(url, headers=headers)
+            # 使用 lxml 解析 HTML 内容，直接传递字节数据（response.content），而不是先解码为字符串
+            selector = etree.HTML(response.content)
+            # 检查解析结果是否为空
+            if selector is None:
+                print(f"警告: 解析页面 {url} 失败。")
+                return None
             return selector
+
         except Exception as e:
-            print('Error: ', e)
+            print(f"请求 {url} 时发生错误: ", e)
             traceback.print_exc()
+            return None
 
     def get_page_num(self):
         """获取关注列表页数"""
